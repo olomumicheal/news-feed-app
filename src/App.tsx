@@ -1,13 +1,34 @@
-// src/App.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import NewsFeed from './pages/NewsFeed';
-// If you implement routing later, import the detail page here:
-// import SinglePost from './pages/SinglePost';
+import SinglePost from './pages/singlePost';
 
 const App: React.FC = () => {
+  const [view, setView] = useState<'feed' | 'post'>('feed');
+
+  // Helper function to toggle the view
+  const toggleView = () => {
+    setView((prevView) => (prevView === 'feed' ? 'post' : 'feed'));
+  };
+
   return (
-    // In a real app, you'd use a router here to switch between NewsFeed and SinglePost
-    <NewsFeed />
+    <>
+      {/* Simple Toggle Button for Demonstration */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={toggleView}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-xl hover:bg-blue-700 transition-colors text-sm"
+        >
+          {view === 'feed' ? 'Switch to Single Post View' : 'Switch back to News Feed'}
+        </button>
+      </div>
+
+      {/* Render the selected view */}
+      {view === 'feed' ? (
+        <NewsFeed />
+      ) : (
+        <SinglePost />
+      )}
+    </>
   );
 };
 

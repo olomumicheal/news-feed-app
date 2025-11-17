@@ -1,9 +1,12 @@
-// src/components/Header.tsx
 import React, { useState } from 'react';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
 }
+
+
+const AVATAR_URL = "https://i.imgur.com/G34yY5W.png";
+const primaryNavLinks = ['Top Stories', 'World', 'Business', 'Tech', 'Culture', 'Sports', 'Arts'];
 
 const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const [secondarySearch, setSecondarySearch] = useState('');
@@ -13,12 +16,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     onSearch(secondarySearch);
   };
 
-  // Navigation Links matching the design structure
-  const primaryNavLinks = ['Top Stories', 'World', 'Business', 'Tech', 'Culture', 'Sports', 'Arts'];
-
-  // Base64 encoded placeholder image for guaranteed loading (cool female avatar icon)
-  const avatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXVzZXItcm91bmQiPjxwYXRoIGQ9Ik0xOSAxNHMyLTUgNC03YTMgMyAwIDEgMC03Ljg5LTEuNjJjLTIuMTItLjQ0LTMuMjMgMi40Ni01LjEtLjAyLTUuMjUtNS41My0xLjAyLTEwLjAzIDYuOTktNy4wN2EzIDMgMCAxIDAgNS42OSAxLjk0YzEuMjguODIgMi40IDIuOTUgMS41IDQuOTgtLjUzIDEuMjQtMi4zMyAzLjctNC44IDEuNjhjLS41Ny0uNDktMS41LS43NC0yLjMzLS40M2EzIDMgMCAxIDAtLjQ5IDUuNzRjLjI0LS4wNy42NS0uMjcgMS4yNC0uNTNMMTkgMTQiL3N2Zz4=";
-  
   return (
     <header className="border-b border-gray-100 bg-white sticky top-0 z-20">
       {/* 1. Top Navigation Row: Logo, Links, Icons */}
@@ -30,7 +27,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             News<span className="font-light">Today</span>
           </h1>
           
-          {/* Main Navigation Links */}
           <nav className="hidden lg:flex space-x-6 text-gray-600">
             {primaryNavLinks.map(link => (
               <a 
@@ -67,12 +63,12 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
           </button>
           
-          {/* User Avatar with Base64 Image */}
-          <div className="w-8 h-8 rounded-full cursor-pointer overflow-hidden border-2 border-white shadow-md bg-blue-500">
+          {/* User Avatar with URL Image */}
+          <div className="w-8 h-8 rounded-full cursor-pointer overflow-hidden border border-gray-200">
             <img 
-              src={avatarBase64} 
+              src={AVATAR_URL} 
               alt="User Avatar" 
-              className="w-full h-full object-cover p-1" // Added p-1 for internal padding to fit the icon
+              className="w-full h-full object-cover" 
             />
           </div>
         </div>

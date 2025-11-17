@@ -1,4 +1,3 @@
-// src/hooks/useNewsApi.ts
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
@@ -31,7 +30,7 @@ const useNewsApi = (initialCategory: string = 'All') => {
 
   const fetchNews = useCallback(async () => {
     if (!API_KEY) {
-      setState({ articles: [], loading: false, error: 'API Key is missing in environment variables.' });
+      setState({ articles: [], loading: false, error: 'API Key is missing in environment variables. Did you restart the server?' });
       return;
     }
 
@@ -41,13 +40,19 @@ const useNewsApi = (initialCategory: string = 'All') => {
       const baseUrl = 'https://newsapi.org/v2/top-headlines';
       const params = {
         apiKey: API_KEY,
-        country: 'us', // Focusing on US headlines for consistency
-        pageSize: 30, // Get a reasonable number of articles
+        country: 'us', 
+        pageSize: 30, 
         category: category !== 'All' ? category.toLowerCase() : undefined,
-        q: searchTerm || undefined, // Use search term if provided
+        q: searchTerm || undefined, 
       };
 
-      const response = await axios.get(baseUrl, { params });
+      const response = await axios.get(baseUrl, { 
+        params,
+        // FIX for 426 Error: Forces a fresh, secure connection
+        headers: {
+          'Connection': 'close', 
+        }
+      });
 
       if (response.data.status !== 'ok') {
         throw new Error(response.data.message || 'Failed to fetch news.');
@@ -60,9 +65,9 @@ const useNewsApi = (initialCategory: string = 'All') => {
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setState({ articles: [], loading: false, error: `Error fetching data: ${errorMessage}` });
+      setState({ articles: [], loading: false, error: `Error fetching data: ${errorMessage}. Please check your network connection or API key.` });
     }
-  }, [category, searchTerm]); // Dependencies: Refetch when category or search term changes
+  }, [category, searchTerm]); 
 
   useEffect(() => {
     fetchNews();

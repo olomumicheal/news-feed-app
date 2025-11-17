@@ -1,10 +1,9 @@
-// src/pages/NewsFeed.tsx
 import React from 'react';
 import useNewsApi from '../hooks/useNewsApi';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
 import ArticleCard from '../components/ArticleCard';
-// We'll create simple Loader and ErrorState components below
+
 import Loader from '../components/Loader';
 import ErrorState from '../components/ErrorState';
 

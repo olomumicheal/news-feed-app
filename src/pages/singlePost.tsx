@@ -1,4 +1,3 @@
-// src/pages/SinglePost.tsx
 import React from 'react';
 // We'll reuse the Header from the main design
 import Header from '../components/Header';
