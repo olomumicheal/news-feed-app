@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-// Define the basic structure of an article we expect from the API
+// Basic structure of an article we expect from the API
 interface Article {
   title: string;
   source: { name: string };
@@ -17,7 +17,8 @@ interface NewsApiState {
   error: string | null;
 }
 
-const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+// TEMPORARY HARDCODED API KEY (REMOVE IN PRODUCTION)
+const API_KEY = '7e1b614915834391a09bc1c18db4c936';
 
 const useNewsApi = (initialCategory: string = 'All') => {
   const [state, setState] = useState<NewsApiState>({
@@ -25,55 +26,70 @@ const useNewsApi = (initialCategory: string = 'All') => {
     loading: true,
     error: null,
   });
+
   const [category, setCategory] = useState(initialCategory);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchNews = useCallback(async () => {
-    if (!API_KEY) {
-      setState({ articles: [], loading: false, error: 'API Key is missing in environment variables. Did you restart the server?' });
-      return;
-    }
-
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const baseUrl = 'https://newsapi.org/v2/top-headlines';
-      const params = {
+      const baseUrl = "https://newsapi.org/v2/everything";
+
+      const params: Record<string, string | number> = {
         apiKey: API_KEY,
-        country: 'us', 
-        pageSize: 30, 
-        category: category !== 'All' ? category.toLowerCase() : undefined,
-        q: searchTerm || undefined, 
+        q: searchTerm || (category === 'All' ? 'top news' : category),
+        language: "en",
+        sortBy: "publishedAt",
+        pageSize: 30,
       };
 
-      const response = await axios.get(baseUrl, { 
+      const response = await axios.get(baseUrl, {
         params,
-        // FIX for 426 Error: Forces a fresh, secure connection
         headers: {
-          'Connection': 'close', 
-        }
+          "Connection": "close",
+        },
       });
 
-      if (response.data.status !== 'ok') {
-        throw new Error(response.data.message || 'Failed to fetch news.');
+      if (response.data.status !== "ok") {
+        throw new Error(response.data.message || "Failed to fetch news.");
       }
 
+      const cleaned = response.data.articles.filter(
+        (a: Article) => a.title !== "[Removed]"
+      );
+
       setState({
-        articles: response.data.articles.filter((a: Article) => a.title !== '[Removed]'),
+        articles: cleaned,
         loading: false,
         error: null,
       });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setState({ articles: [], loading: false, error: `Error fetching data: ${errorMessage}. Please check your network connection or API key.` });
+    } catch (err: unknown) {
+      const errorMessage = axios.isAxiosError(err) && err.response
+        ? `Request failed with status ${err.response.status}`
+        : err instanceof Error
+        ? err.message
+        : "Unknown error";
+
+      setState({
+        articles: [],
+        loading: false,
+        error: `Error fetching data: ${errorMessage}`,
+      });
     }
-  }, [category, searchTerm]); 
+  }, [category, searchTerm]);
 
   useEffect(() => {
     fetchNews();
   }, [fetchNews]);
 
-  return { ...state, setCategory, setSearchTerm, category };
+  return {
+    ...state,
+    category,
+    setCategory,
+    searchTerm,
+    setSearchTerm,
+  };
 };
 
 export default useNewsApi;

@@ -1,95 +1,77 @@
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React from 'react';
+import useNewsApi from '../hooks/useNewsApi';
+import Header from '../components/Header';
+import FilterBar from '../components/FilterBar';
+import ArticleCard from '../components/ArticleCard';
+import Loader from '../components/Loader';
+import ErrorState from '../components/ErrorState';
 
-// Basic structure of an article we expect from the API
-interface Article {
-  title: string;
-  source: { name: string };
-  publishedAt: string;
-  urlToImage: string | null;
-  url: string;
-  content: string | null;
-}
+const NewsFeed: React.FC = () => {
+  const { articles, loading, error, setCategory, setSearchTerm, category } = useNewsApi();
 
-interface NewsApiState {
-  articles: Article[];
-  loading: boolean;
-  error: string | null;
-}
+  const breakingArticle = articles.length > 0 ? articles[0] : null;
+  const recentArticles = articles.slice(1);
 
-// TEMPORARY HARDCODED API KEY (REMOVE IN PRODUCTION)
-const API_KEY = '7e1b614915834391a09bc1c18db4c936';
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header onSearch={setSearchTerm} />
 
-const useNewsApi = (initialCategory: string = 'All') => {
-  const [state, setState] = useState<NewsApiState>({
-    articles: [],
-    loading: true,
-    error: null,
-  });
+      <main className="container mx-auto px-6 pt-4 pb-12">
+        {/* Loading and Error States */}
+        {loading && <Loader />}
+        {error && <ErrorState message={error} />}
 
-  const [category, setCategory] = useState(initialCategory);
-  const [searchTerm, setSearchTerm] = useState('');
+        {!loading && !error && (
+          <>
+            {/* --- 1. The Large "Breaking" Banner --- */}
+            {breakingArticle && (
+              <div className="mb-8">
+                <div className="relative w-full h-96 bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
+                  {/* Image with Dark Overlay */}
+                  <img
+                    src={breakingArticle.urlToImage || 'https://via.placeholder.com/1200x400?text=Breaking+News'}
+                    alt={breakingArticle.title}
+                    className="w-full h-full object-cover opacity-60"
+                  />
+                  {/* Gradient to darken the bottom */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
-  const fetchNews = useCallback(async () => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+                  {/* Text Content */}
+                  <div className="absolute bottom-0 left-0 p-8 text-white w-full lg:w-3/4">
+                    <h2 className="text-sm font-light uppercase text-blue-300 mb-2 tracking-wider">
+                        BREAKING NEWS
+                    </h2>
+                    <p className="text-4xl font-bold leading-tight hover:text-blue-200 transition-colors cursor-pointer">
+                      {breakingArticle.title}
+                    </p>
+                    <button className="mt-4 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+                      Read Article
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-    try {
-      const baseUrl = "https://newsapi.org/v2/everything";
+            {/* --- 2. Recent Articles Section Header and Filter Bar --- */}
+            <h2 className="text-2xl font-bold text-gray-800 mt-10 mb-4">Recent Articles</h2>
 
-      const params: Record<string, string | number> = {
-        apiKey: API_KEY,
-        q: searchTerm || (category === 'All' ? 'top news' : category),
-        language: "en",
-        sortBy: "publishedAt",
-        pageSize: 30,
-      };
-
-      const response = await axios.get(baseUrl, {
-        params,
-        headers: {
-          "Connection": "close",
-        },
-      });
-
-      if (response.data.status !== "ok") {
-        throw new Error(response.data.message || "Failed to fetch news.");
-      }
-
-      const cleaned = response.data.articles.filter(
-        (a: Article) => a.title !== "[Removed]"
-      );
-
-      setState({
-        articles: cleaned,
-        loading: false,
-        error: null,
-      });
-    } catch (err: unknown) {
-      const errorMessage = axios.isAxiosError(err) && err.response
-        ? `Request failed with status ${err.response.status}`
-        : err instanceof Error
-        ? err.message
-        : "Unknown error";
-
-      setState({
-        articles: [],
-        loading: false,
-        error: `Error fetching data: ${errorMessage}`,
-      });
-    }
-  }, [category, searchTerm]);
-
-  useEffect(() => {
-    fetchNews();
-  }, [fetchNews]);
-
-  return {
-    ...state,
-    category,
-    setCategory,
-    searchTerm,
-    setSearchTerm,
-  };
+            <FilterBar activeCategory={category} onCategoryChange={setCategory} />
+            
+            {/* --- 3. The Grid of Article Cards --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-6">
+              {recentArticles.map((article, index) => (
+                <ArticleCard key={index} article={article} />
+              ))}
+            </div>
+            
+            {recentArticles.length === 0 && (
+                <p className="text-center text-gray-500 py-12">No articles found for this selection or search term.</p>
+            )}
+          </>
+        )}
+      </main>
+    </div>
+  );
 };
 
-export default useNewsApi;
+export default NewsFeed;
