@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import NewsFeed from './pages/NewsFeed';
-import SinglePost from './pages/singlePost';
+import NewsFeed from './pages/NewsFeed';       
+import SinglePost from './pages/singlePost'; 
 
 const App: React.FC = () => {
   const [view, setView] = useState<'feed' | 'post'>('feed');
 
-  // Helper function to toggle the view
   const toggleView = () => {
     setView((prevView) => (prevView === 'feed' ? 'post' : 'feed'));
   };
@@ -24,6 +23,7 @@ const App: React.FC = () => {
 
       {/* Render the selected view */}
       {view === 'feed' ? (
+        // This is the correct way to render the component:
         <NewsFeed />
       ) : (
         <SinglePost />
